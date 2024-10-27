@@ -5,6 +5,8 @@ const{jwt} = require("jsonwebtoken")
 const {JWT_ADMIN_PASSWORD} = require('../config')
 const{adminMiddleware} = require('../middlewares/admin')
 
+
+// admin signup
 adminRouter.post('/signup',async function(req,res){
     const{email,password,firstname,lastname} = req.body;
     await adminModel.create({
@@ -19,6 +21,7 @@ adminRouter.post('/signup',async function(req,res){
     })
 })
 
+// admin signin
 adminRouter.post('/signin',async function(req,res){
     const{email,password} = req.body;
     const admin = await adminModel.findOne({
@@ -40,6 +43,7 @@ adminRouter.post('/signin',async function(req,res){
     
 })
 
+//created the course
 adminRouter.post('/course',adminMiddleware,async function(req,res){
     const adminId = req.userId;
     const{title,description,imageUrl,price} = req.body;
@@ -59,16 +63,37 @@ adminRouter.post('/course',adminMiddleware,async function(req,res){
 })
 
 
-adminRouter.put('/course',function(req,res){
-    
+//admin can update the courses that they have created
+adminRouter.put('/course',adminMiddleware,async function(req,res){
+    const adminId = req.userId
+    const { title, description, imageUrl, price, courseId } = req.body
+    const course = await courseModel.updateOne({
+        _id:courseId,
+        creatorId:adminId
+    },
+    {
+        title:title,
+        description:description,
+        imageUrl:imageUrl,
+        price:price
+    })
     res.json({
-        message:"update or edit the course"
+        message:"course updated",
+        courseId:course._id
     })
 })
 
-adminRouter.get('/course/bulk',function(req,res){
+//admin can see all the courses that they have get
+adminRouter.get('/course/bulk', adminMiddleware,async function(req,res){
+    const adminId = req.userId;
+
+    const courses = await courseModel.find({
+        creatorId: adminId 
+    });
+
     res.json({
-        message:"get all the courses that have bought"
+        message: "Course updated",
+        courses
     })
 })
 

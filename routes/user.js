@@ -39,10 +39,28 @@ userRouter.post('/signin',async function(req,res){
     }
 })
 
-userRouter.get('/purchased',function(req,res){
-    res.json({
-        message:"All purchased course are here"
+userRouter.get('/purchased',async function(req,res){
+    const userId = req.userId;
+
+    const purchases = await purchaseModel.find({
+        userId,
+    });
+
+    let purchasedCourseIds = [];
+
+    for (let i = 0; i<purchases.length;i++){ 
+        purchasedCourseIds.push(purchases[i].courseId)
+    }
+
+    const coursesData = await courseModel.find({
+        _id: { $in: purchasedCourseIds }
     })
+
+    res.json({
+        purchases,
+        coursesData
+    })
+
 })
 
 module.exports = {
